@@ -10,7 +10,7 @@ from decouple import config
 from utils.vector_db import get_list_collection_names
 
 GOOGLE_API_KEY = config('GOOGLE_API_KEY')
-
+collection_names = [str(i) for i in get_list_collection_names()]
 
 class Document(BaseModel):
     id: str = Field(description="id of Document")
@@ -28,16 +28,16 @@ class RouteQuery(BaseModel):
 
 
 class QueryRouter:
-    def __init__(self, api_key: str):
+    def __init__(self):
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-pro",
+            model="gemini-2.0-flash-exp",
             google_api_key=GOOGLE_API_KEY,
             temperature=0,
         )
 
         self.parser = PydanticOutputParser(pydantic_object=RouteQuery)
 
-        collection_names = [str(i) for i in get_list_collection_names()]
+
 
         self.prompt_template = PromptTemplate(
             template="""Given the query: "{query}", analyze its intent, context, and domain to determine the most 
@@ -45,7 +45,7 @@ class QueryRouter:
             {sources}
       
 
-            Your task is to select the single most relevant source or specify if multiple sources are needed. 
+             Your task is to select the single most relevant source from description of document. 
             Provide a justification for your choice and summarize the key criteria used in your decision.
             
             {format_instructions}
@@ -54,31 +54,27 @@ class QueryRouter:
             """,
             input_variables=["query"],
             partial_variables={"format_instructions": self.parser.get_format_instructions(),
-                               'sources':''.join(collection_names)}
+                               'sources': ''.join(collection_names)}
         )
 
     def route_query(self, query: str):
+
+        import time
+        time1 = time.time()
         # Generate the prompt
         prompt = self.prompt_template.format(query=query)
 
+        print("time temp:", time.time() - time1)
+
+
+
         # Get response from Gemini
         response = self.llm.invoke(prompt)
+        print("time LLM response:", time.time() - time1)
 
         # Parse the response
         parsed_response = self.parser.parse(response.content)
 
-        print(parsed_response)
 
 
-if __name__ == "__main__":
-    # Initialize the router
-
-
-    router = QueryRouter(api_key="YOUR_GOOGLE_API_KEY")
-    query = " nhân viên GEM bắt đầu làm việc từ mấy giờ"
-    router.route_query(query)
-
-
-
-
-
+        return parsed_response.datasources[0].document_name

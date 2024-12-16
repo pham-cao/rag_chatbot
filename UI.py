@@ -7,6 +7,7 @@ from qdrant_client.http.exceptions import UnexpectedResponse
 from utils.vector_db import get_list_collection_names, delete_collection
 from VectorStoreDB import load_docs_from_text
 import os
+from generate import  generate_answer
 
 
 def stream_data(text):
@@ -45,18 +46,15 @@ page = st.sidebar.radio(" ", ["Document Manager", "Chat Bot"])
 
 # Trang 2: Chat Bot
 if page == "Chat Bot":
-    st.title("Chat Bot")
+    # st.title("Chat Bot")
     user_input = st.chat_input("Say something")
-    text = """
-Lorem ipsum dolor sit amet, **consectetur adipiscing** elit, sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-"""
+    st.chat_message("assistant").write('Chào bạn! Tôi có thể giúp gì cho bạn hôm nay? 😊')
     if user_input:
         user = st.chat_message('user')
         message = st.chat_message("assistant")
         user.write(user_input)
-        message.write_stream(stream_data(text=text))
+        anwser = generate_answer(user_input)
+        message.write_stream(stream_data(text=anwser))
 
 # Trang 3: Database Viewer
 elif page == "Document Manager":
@@ -94,6 +92,7 @@ elif page == "Document Manager":
                 if description:
                     with st.spinner('processing...'):
                         try:
+
                             load_docs_from_text(text, uploaded_file.name, description)
                             st.success(" insert completed successfully!")
                             time.sleep(1)
