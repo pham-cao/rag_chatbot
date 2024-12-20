@@ -46,15 +46,42 @@ page = st.sidebar.radio(" ", ["Document Manager", "Chat Bot"])
 
 # Trang 2: Chat Bot
 if page == "Chat Bot":
-    # st.title("Chat Bot")
-    user_input = st.chat_input("Say something")
-    st.chat_message("assistant").write('Chào bạn! Tôi có thể giúp gì cho bạn hôm nay? 😊')
-    if user_input:
-        user = st.chat_message('user')
-        message = st.chat_message("assistant")
-        user.write(user_input)
-        anwser = generate_answer(user_input)
-        message.write_stream(stream_data(text=anwser))
+
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # Display chat messages from history on app rerun
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # Accept user input
+    if prompt := st.chat_input("What is up?"):
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        # # Display user message in chat message container
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        anwser = generate_answer(prompt)
+        #
+        # # Display assistant response in chat message container
+        with st.chat_message("assistant"):
+            response = st.write_stream(stream_data(text=anwser))
+        # # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": "Hello there! How can I assist you today?"})
+
+
+    # # st.title("Chat Bot")
+    # user_input = st.chat_input("Say something")
+    # st.chat_message("assistant").write('Chào bạn! Tôi có thể giúp gì cho bạn hôm nay? 😊')
+    # if user_input:
+    #     user = st.chat_message('user')
+    #     message = st.chat_message("assistant")
+    #     user.write(user_input)
+    #     anwser = generate_answer(user_input)
+    #     message.write_stream(stream_data(text=anwser))
 
 # Trang 3: Database Viewer
 elif page == "Document Manager":
