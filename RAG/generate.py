@@ -2,16 +2,13 @@ from utils.LLM import llm, query_embeddings_model
 from langchain_qdrant import QdrantVectorStore
 from utils.vector_db import client_db
 from langchain_core.prompts import PromptTemplate
-from RouterQuery import QueryRouter
+from RAG.RouterQuery import QueryRouter
 import time
 
 query_router = QueryRouter()
 
 
 def generate_answer(question):
-
-    # question = "GEM vao lam viec luc may gio"
-
     time1 = time.time()
     collection_name = query_router.route_query(question)
     time2 = time.time()

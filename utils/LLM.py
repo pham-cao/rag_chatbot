@@ -21,7 +21,15 @@ query_embeddings_model = GoogleGenerativeAIEmbeddings(model=model_embeddings_nam
 doc_embeddings_model = GoogleGenerativeAIEmbeddings(model=model_embeddings_name,
                                                     task_type="retrieval_document",
                                                     google_api_key=GOOGLE_API_KEY)
-
-# query_embeddings_model = HuggingFaceEmbeddings(model_name='paraphrase-multilingual-MiniLM-L12-v2')
+llm.invoke('helllo')
+# # query_embeddings_model = HuggingFaceEmbeddings(model_name='paraphrase-multilingual-MiniLM-L12-v2')
+# #
+# # doc_embeddings_model = query_embeddings_model
 #
-# doc_embeddings_model = query_embeddings_model
+#
+# from RAG.ExpansionQuery import ExpansionQuery
+#
+# EXPANSION_QUERY = ExpansionQuery(llm=llm)
+# x= EXPANSION_QUERY.invoke('ở GEM thì mấy giờ chấm công ?')
+# print(x)
+

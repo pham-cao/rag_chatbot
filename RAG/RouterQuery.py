@@ -10,7 +10,7 @@ from decouple import config
 from utils.vector_db import get_list_collection_names
 
 GOOGLE_API_KEY = config('GOOGLE_API_KEY')
-collection_names = [str(i) for i in get_list_collection_names()]
+
 
 class Document(BaseModel):
     id: str = Field(description="id of Document")
@@ -36,6 +36,7 @@ class QueryRouter:
         )
 
         self.parser = PydanticOutputParser(pydantic_object=RouteQuery)
+        collection_names = [str(i) for i in get_list_collection_names()]
 
 
 
