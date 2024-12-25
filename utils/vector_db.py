@@ -12,6 +12,7 @@ client_db = QdrantClient(host=QDRANT_HOST,
 
 
 def create_new_collection(collection_name, description):
+    print(collection_name)
     client_db.create_collection(collection_name=collection_name,
                                 vectors_config=VectorParams(size=768,
                                                             distance=Distance.COSINE))

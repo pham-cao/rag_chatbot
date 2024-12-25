@@ -1,4 +1,4 @@
-from utils.LLM import doc_embeddings_model
+from RAG.LLMs import doc_embeddings_model
 from langchain_experimental.text_splitter import SemanticChunker
 from uuid import uuid4
 from langchain_qdrant import QdrantVectorStore

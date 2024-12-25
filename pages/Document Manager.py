@@ -7,8 +7,16 @@ from qdrant_client.http.exceptions import UnexpectedResponse
 from utils.vector_db import get_list_collection_names, delete_collection
 from RAG.VectorStoreDB import load_docs_from_text
 import os
+from RAG.Ingestor import Ingestor
+
+
+ingestor = Ingestor()
+
+
 
 st.set_page_config(page_title="Document Manager", page_icon="📈")
+
+
 
 
 def show_content(text):
@@ -63,25 +71,21 @@ with tab3:
     if uploaded_file is not None:
 
         text = load_document(uploaded_file)
-        description = st.text_input("Nhập mô tả cho tài liệu", placeholder='descript for document', )
         button1, button2 = st.columns(2)
         if button2.button("Insert to Database"):
-            if description:
-                with st.spinner('processing...'):
-                    try:
-
-                        load_docs_from_text(text, uploaded_file.name, description)
-                        st.success(" insert completed successfully!")
-                        time.sleep(1)
-                        st.rerun()
-                    except UnexpectedResponse as e:
-                        if e.status_code == 409:
-                            st.error('⚠️ Document already exists!')
-                        else:
-                            st.error(e)
-
-            else:
-                st.error("⚠️ Please enter a description!")
+            # if description:
+            with st.spinner('processing...'):
+                try:
+                    ingestor.insert(text,uploaded_file.name)
+                    # load_docs_from_text(text, uploaded_file.name, description)
+                    st.success(" insert completed successfully!")
+                    time.sleep(1)
+                    st.rerun()
+                except UnexpectedResponse as e:
+                    if e.status_code == 409:
+                        st.error('⚠️ Document already exists!')
+                    else:
+                        st.error(e)
 
         if button1.button("show content"):
             show_content(text=text)

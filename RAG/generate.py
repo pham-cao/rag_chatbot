@@ -1,4 +1,4 @@
-from utils.LLM import llm, query_embeddings_model
+from RAG.LLMs import llm, query_embeddings_model
 from langchain_qdrant import QdrantVectorStore
 from utils.vector_db import client_db
 from langchain_core.prompts import PromptTemplate
@@ -9,10 +9,7 @@ query_router = QueryRouter()
 
 
 def generate_answer(question):
-    time1 = time.time()
     collection_name = query_router.route_query(question)
-    time2 = time.time()
-    print(collection_name)
     vector_store = QdrantVectorStore(client=client_db,
                                      collection_name=collection_name,
                                      embedding=query_embeddings_model)
@@ -21,7 +18,6 @@ def generate_answer(question):
 
     result = vector_store_rtv.invoke(question)
     y = " ".join([x.page_content for x in result])
-    time3 = time.time()
 
     prompt = PromptTemplate.from_template("""      
         Bạn Là Elsa , một nữ nhân viên tư vấn thông minh , có tài ăn nói và  có nhiều năm kinh nghiệm trong việc tư vấn và hỗ trợ khách hàng của GEM .
@@ -40,8 +36,4 @@ def generate_answer(question):
     chain = prompt | llm
     anwser = chain.invoke({"matching_engine_response": y,
                            "question": question})
-    time4 = time.time()
-    print(time2 - time1)
-    print(time3 - time2)
-    print(time4 - time3)
     return anwser
