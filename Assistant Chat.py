@@ -1,5 +1,7 @@
 import streamlit as st
 from RAG.generate import generate_answer
+
+from RAG.generator import RAGChain
 import datetime
 import time
 
@@ -40,6 +42,8 @@ st.markdown(
 # Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "chain" not in st.session_state:
+    st.session_state.chain = RAGChain()
 # Display chat messages from history on app rerun
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
@@ -52,7 +56,7 @@ if prompt := st.chat_input("What is up?"):
     # # Display user message in chat message container
     with st.chat_message("user"):
         st.markdown(prompt)
-    answer = generate_answer(prompt)
+    answer = st.session_state.chain.invoke(prompt)
     # # Display assistant response in chat message container
     with st.chat_message("assistant"):
         response = st.write_stream(stream_data(text=answer))

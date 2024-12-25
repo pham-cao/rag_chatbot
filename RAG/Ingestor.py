@@ -7,11 +7,21 @@ from more_itertools import chunked
 from uuid import uuid4
 from langchain_qdrant import QdrantVectorStore
 
+
+from langchain_experimental.text_splitter import SemanticChunker
+#
+# SemanticChunker(embeddings=doc_embeddings_model,
+#                                        breakpoint_threshold_type="percentile")
+
+
 class Ingestor:
     def __init__(self):
         self.db_client = client_db
         self.embedding_model = query_embeddings_model
-        self.splitter = RecursiveCharacterTextSplitter(chunk_size=1028, chunk_overlap=256)
+        # self.splitter = RecursiveCharacterTextSplitter(chunk_size=1028, chunk_overlap=256)
+
+        self.splitter = SemanticChunker(embeddings=query_embeddings_model,
+                                       breakpoint_threshold_type="percentile")
         self.summarizer = load_summarizer_chain
 
     def insert(self, text: str, collection_name: str):
