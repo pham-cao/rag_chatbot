@@ -1,6 +1,4 @@
 import streamlit as st
-from RAG.generate import generate_answer
-
 from RAG.generator import RAGChain
 import datetime
 import time
