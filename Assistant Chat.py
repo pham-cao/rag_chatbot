@@ -1,5 +1,5 @@
 import streamlit as st
-from RAG.generator import RAGChain
+from RAG.Generator import RAGChain
 import datetime
 import time
 

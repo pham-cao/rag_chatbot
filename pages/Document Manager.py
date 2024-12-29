@@ -5,7 +5,6 @@ import pandas as pd
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
 from qdrant_client.http.exceptions import UnexpectedResponse
 from utils.vector_db import get_list_collection_names, delete_collection
-from RAG.VectorStoreDB import load_docs_from_text
 import os
 from RAG.Ingestor import Ingestor
 

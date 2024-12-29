@@ -1,5 +1,5 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from RAG.summarizer import load_summarizer_chain
+from RAG.Summarizer import load_summarizer_chain
 from RAG.LLMs import llm, query_embeddings_model
 from langchain.schema.document import Document
 from utils.vector_db import client_db, create_new_collection

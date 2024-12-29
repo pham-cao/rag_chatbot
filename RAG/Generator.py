@@ -10,12 +10,13 @@ from langchain_core.prompts import PromptTemplate
 import logging
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.messages import HumanMessage, AIMessage
-from redisvl.extensions.llmcache import SemanticCache
-from PROMPT import *
+from RAG.PROMPT import *
 logging.basicConfig()
 logging.getLogger("langchain.retrievers.multi_query").setLevel(logging.INFO)
 
+
+from RAG.Rewriter import ReWriter
+from RAG.SematicCache import CachingSearch
 
 
 vector_store = QdrantVectorStore(
@@ -67,8 +68,8 @@ def init_rag_chain(history_aware_retriever):
     qa_prompt = ChatPromptTemplate.from_messages(
         [
             ("system", QA_SYSTEM_PROMPT),
-            MessagesPlaceholder("chat_history"),
-            ("human", "{input}"),
+            # MessagesPlaceholder("chat_history"),
+            ("human", "{input}")
         ]
     )
 
@@ -78,48 +79,22 @@ def init_rag_chain(history_aware_retriever):
     return rag_chain
 
 
-
-from redisvl.utils.vectorize import CustomTextVectorizer
-
-vectorizer = CustomTextVectorizer(embed=doc_embeddings_model.embed_query)
-
-
-
 class RAGChain:
     def __init__(self):
-        self.chat_history = []
+        self.rewriter = ReWriter()
+        self.cache = CachingSearch()
+        # self.cache.cache.clear()
         self.retriever = init_retriever()
-        self.history_aware_retriever = init_history_aware_retriever(self.retriever)
-        self.rag_chain = init_rag_chain(self.history_aware_retriever)
-
-        self.cache = SemanticCache(
-            name="llmcache",  # underlying search index name
-            prefix="llmcache",  # redis key prefix for hash entries
-            redis_url="redis://localhost:6379",  # redis connection url string
-            distance_threshold=0.01,
-            vectorizer=vectorizer# semantic cache distance threshold,
-
-        )
-        self.cache.clear()
-
-        self.rewrite_prompt = PromptTemplate(template=REWRITE_PROMPT,
-                                             input_variables=["query", "response"]
-                                             )
-
-        self.rewrite_chain = self.rewrite_prompt | llm
+        self.rag_chain = init_rag_chain(self.retriever)
 
     def invoke(self, question):
-        if response := self.cache.check(prompt=question, return_fields=["response"]):
-            response = response[0]["response"]
-            response = self.rewrite_chain.invoke({"query": question, "response": response})
+        question_rewrite = self.rewriter.invoke(question)
+        print(question_rewrite)
 
-
-        else:
-
-            response = self.rag_chain.invoke({"input": question, "chat_history": self.chat_history})["answer"]
-            self.cache.store(
-                prompt=question,
-                response=response
-            )
-        self.chat_history.extend([HumanMessage(content=question), AIMessage(content=response)])
+        response = self.cache.search(question_rewrite)
+        if response is None:
+            response = self.rag_chain.invoke({"input": question_rewrite })["answer"]
+        self.cache.add_cache(question_rewrite,response)
+        self.rewriter.add_history(question_rewrite,response)
         return response
+
